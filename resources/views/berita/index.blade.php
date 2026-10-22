@@ -29,10 +29,10 @@
 
                         <label class="form-label">Kategori</label>
                         <select name="kategori" class="form-select mb-3">
-                            <option value="">Semua Kategori</option>
-                            @foreach (['Olahraga', 'Pendidikan', 'Potensi', 'Pembangunan'] as $k)
-                                <option value="{{ $k }}" @selected(request('kategori') == $k)>{{ $k }}</option>
-                            @endforeach
+                        <option value="">Semua Kategori</option>
+                        @foreach ($kategoris as $k)
+                         <option value="{{ $k->id }}" @selected(request('kategori') == $k->id)>{{ $k->nama }}</option>
+                        @endforeach
                         </select>
 
                         <button type="submit" class="btn btn-primary w-100 mb-2">Cari</button>
@@ -41,7 +41,9 @@
                 </div>
             </div>
 
+            @auth
             <a href="{{ route('berita.create') }}" class="btn btn-success w-100 mt-3">+ Tambah Berita</a>
+            @endauth
         </div>
 
         {{-- DAFTAR BERITA (3 kolom, lebar sama dengan sidebar) --}}
@@ -49,13 +51,15 @@
             <div class="berita-list">
                 @forelse ($beritas as $berita)
                     <div class="card card-berita">
-                        <img class="thumb"
-                             src="{{ $berita->gambar ?: 'https://placehold.co/600x300?text=Berita+Desa' }}"
-                             alt="{{ $berita->judul }}">
+                        
+        <img class="thumb"
+            src="{{ $berita->gambar ? asset('storage/' . $berita->gambar) : 'https://placehold.co/600x300?text=Berita+Desa' }}"
+            alt="{{ $berita->judul }}">
 
                         <div class="card-body">
                             <div>
-                                <span class="badge-kategori">{{ $berita->kategori }}</span>
+                               
+                                <span class="badge badge-kategori text-white">{{ $berita->kategori->nama }}</span>
                                 <span class="tgl-berita">
                                     <i class="bi bi-calendar3"></i> {{ $berita->created_at->format('d M Y') }}
                                 </span>
@@ -69,9 +73,11 @@
 
                             <p class="excerpt-berita">{{ Str::limit(strip_tags($berita->isi), 120) }}</p>
 
-                            <div class="mb-3">
-                                <span class="tag-pill">#{{ Str::slug($berita->kategori) }}</span>
-                                <span class="tag-pill">#desa</span>
+                           <div class="mb-2">
+                            @foreach ($berita->tags as $tag)
+                             <a href="{{ route('berita.index', ['tag' => $tag->id]) }}"
+                             class="tag-pill text-decoration-none">#{{ $tag->nama }}</a>
+                             @endforeach
                             </div>
 
                             <div class="berita-footer">
@@ -81,15 +87,29 @@
                                 </a>
                             </div>
 
-                            <div class="mt-3 pt-3 border-top d-flex gap-2">
-                                <a href="{{ route('berita.edit', $berita) }}" class="btn btn-sm btn-outline-warning">Edit</a>
-                                <form action="{{ route('berita.destroy', $berita) }}" method="POST"
-                                      onsubmit="return confirm('Yakin hapus berita ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger">Hapus</button>
-                                </form>
-                            </div>
+                            
+                            @auth
+                            <div class="mt-2 pt-2 border-top d-flex gap-2">
+                                 <a href="{{ route('berita.edit', $berita) }}"
+                                     class="btn btn-sm btn-outline-warning">
+                                      Edit
+                                </a>
+
+                            @if (auth()->user()->isAdmin())
+                            <form action="{{ route('berita.destroy', $berita) }}"
+                                 method="POST"
+                                 onsubmit="return confirm('Yakin hapus berita ini?')">
+                             @csrf
+                             @method('DELETE')
+
+                             <button type="submit" class="btn btn-sm btn-outline-danger">
+                                Hapus
+                             </button>
+                            </form>
+                        @endif
+                         </div>
+                        @endauth
+
                         </div>
                     </div>
                 @empty

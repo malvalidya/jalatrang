@@ -61,6 +61,9 @@
         align-items: center;
         justify-content: space-between;
         font-family: 'Oswald', sans-serif;
+
+        flex-wrap: wrap;
+        gap: 12px;
     }
     .brand-box {
         display: flex;
@@ -93,6 +96,8 @@
         list-style: none;
         margin: 0;
         padding: 0;
+
+        flex-wrap: wrap;
     }
     .nav-menu a {
         color: #e2e8f0;
@@ -315,8 +320,35 @@
             <li><a href="#">Keuangan</a></li>
             <li><a href="#">Download</a></li>
             <li><a href="#" class="nav-grid"><i class="bi bi-grid-3x3-gap-fill"></i></a></li>
+   
         </ul>
+
+        <div class="ms-auto d-flex align-items-center gap-2">
+            @auth
+                <span class="text-white small">
+                    <i class="bi bi-person-circle"></i>
+                    {{ auth()->user()->name }}
+                    ({{ auth()->user()->role }})
+                </span>
+
+                <form action="{{ route('logout') }}"
+                      method="POST"
+                      class="d-inline">
+                    @csrf
+                    <button type="submit"
+                            class="btn btn-sm btn-outline-light">
+                        Logout
+                    </button>
+                </form>
+            @else
+                <a href="{{ route('login') }}"
+                   class="btn btn-sm btn-warning">
+                    Login
+                </a>
+            @endauth
+        </div>
     </header>
+
 
     @if (session('success'))
         <div class="container mt-3" style="max-width:1250px">
